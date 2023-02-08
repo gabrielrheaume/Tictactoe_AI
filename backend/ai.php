@@ -75,7 +75,7 @@ function play($grille, $pion)
         $index = findDoubleMenace($grille, $pion)[0]; // find if O can do two tictactoe menaces
         if($index != -1) return $index;
 
-        $index = tttMenace($grille, $pion);
+        $index = counterTTTMenace($grille, $pion);
         if($index != -1) return $index;
 
         //////////////////// improve here ///////////////////////////////
@@ -174,16 +174,13 @@ function oppositeCorner($grille, $value)
  */
 function ticTacToe($grille, $pion)
 {
-    $index = -1;
+    $eachPossibilities = eachTTTPossibilities();
 
-    $index = thatCodeRepeats($grille, $pion, 0, 1, 2, $index); // upper row
-    $index = thatCodeRepeats($grille, $pion, 3, 4, 5, $index); // middle row
-    $index = thatCodeRepeats($grille, $pion, 6, 7, 8, $index); // lower row
-    $index = thatCodeRepeats($grille, $pion, 0, 3, 6, $index); // left column
-    $index = thatCodeRepeats($grille, $pion, 1, 4, 7, $index); // middle column
-    $index = thatCodeRepeats($grille, $pion, 2, 5, 8, $index); // right column
-    $index = thatCodeRepeats($grille, $pion, 0, 4, 8, $index); // left to right diagonal
-    $index = thatCodeRepeats($grille, $pion, 2, 4, 6, $index); // right to left diagonal
+    $index = -1;
+    foreach($eachPossibilities as $possibility)
+    {
+        if($index == -1) $index = thatCodeRepeats($grille, $pion, $possibility[0], $possibility[1], $possibility[2]);
+    }
 
     return $index;
 }
@@ -199,15 +196,32 @@ function ticTacToe($grille, $pion)
  * @param int $index - -1 if a possible tictactoe is still not find
  * @return int - index where to play in the game grid; -1 if no index is found
  */
-function thatCodeRepeats($grille, $pion, $a, $b, $c, $index)
+function thatCodeRepeats($grille, $pion, $a, $b, $c)
 {
-    if($index != -1) return $index;
-
     if($grille[$a] == $pion && $grille[$b] == $pion && empty($grille[$c])) return $c;
     if($grille[$a] == $pion && $grille[$c] == $pion && empty($grille[$b])) return $b;
     if($grille[$b] == $pion && $grille[$c] == $pion && empty($grille[$a])) return $a;
 
     return -1;
+}
+
+/**
+ * Return every line that could make a tictactoe
+ *
+ * @return array
+ */
+function eachTTTPossibilities()
+{
+    return [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6],
+    ];
 }
 
 /**
@@ -219,7 +233,25 @@ function thatCodeRepeats($grille, $pion, $a, $b, $c, $index)
  */
 function findDoubleMenace($grille, $pion, $searched_index = null)
 {
-    $eachPossibilities = [
+    $eachPossibilities = eachDoubleMenacePossibilities();
+
+    foreach($eachPossibilities as $possibility)
+    {
+        $index = getIndexOfDoubleMenace($grille, $pion, $possibility[0], $possibility[1], $searched_index);
+        if($index > -1) return [$index, $possibility[0], $possibility[1]];
+    }
+
+    return [-1, [], []];
+}
+
+/**
+ * Return every combinations of lines for a double menace
+ *
+ * @return array
+ */
+function eachDoubleMenacePossibilities()
+{
+    return [
         [[0, 1, 2], [0, 3, 6]],
         [[0, 1, 2], [1, 4, 7]],
         [[0, 1, 2], [2, 5, 8]],
@@ -249,16 +281,7 @@ function findDoubleMenace($grille, $pion, $searched_index = null)
 
         [[0, 4, 8], [2, 4, 6]],
     ];
-
-    foreach($eachPossibilities as $possibility)
-    {
-        $index = getIndexOfDoubleMenace($grille, $pion, $possibility[0], $possibility[1], $searched_index);
-        if($index > -1) return [$index, $possibility[0], $possibility[1]];
-    }
-
-    return [-1, [], []];
 }
-
 /**
  * Determine if two lines can make a double menace
  *
@@ -308,8 +331,9 @@ function getIndexOfDoubleMenace($grille, $pion, $line1, $line2, $searched_index 
  * @param char $pion - char representing a player
  * @return int - index where to play in the game grid; -1 if no index is found
  */
-function tttMenace($grille, $pion)
+function counterTTTMenace($grille, $pion)
 {
+    // ?grille=["","","","","o","x","","x",""]&pion=o
     $infos = findDoubleMenace($grille, otherPion($pion));
     if($infos[0] != -1) $index = blockDoubleMenaceAndAttack($grille, $pion, $infos[0], $infos[1], $infos[2]); // prendre une des positions pour la bloquer
 
@@ -330,5 +354,34 @@ function tttMenace($grille, $pion)
  */
 function blockDoubleMenaceAndAttack($grille, $pion, $index, $line1, $line2)
 {
-    
+    $empty_indexes = [BDMAAloop($grille, $line1, $index), BDMAAloop($grille, $line2, $index)];
+    foreach($empty_indexes as $searched_index)
+    {
+        var_dump(tttMenace($grille, $pion, $searched_index)); exit();
+    }
+}
+
+/**
+ * Loop on each index of a line that constitute a double menace to find the empty index who's not the one shared by both lines
+ *
+ * @param array $grille - actual state of the game grid
+ * @param array $line - a line that consitute a double menace
+ * @param int $index - the index of the shared index between two lines
+ * @return void
+ */
+function BDMAAloop($grille, $line, $index)
+{
+    foreach($line as $line_index)
+    {
+        if($grille[$line_index] == "" && $line_index != $index) return $line_index;
+    }
+
+    return -1;
+}
+
+function tttMenace($grille, $pion, $index)
+{
+    $eachPossibilities = eachTTTPossibilities();
+
+    /////////////////// here ////////////////////////
 }
