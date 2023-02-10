@@ -75,14 +75,13 @@ function play($grille, $pion)
         $index = findDoubleMenace($grille, $pion)[0]; // find if O can do two tictactoe menaces
         if($index != -1) return $index;
 
-        $index = counterTTTMenace($grille, $pion);
+        $index = specialCase($grille, $pion); // in a special case
         if($index != -1) return $index;
 
-        //////////////////// improve here ///////////////////////////////
-        $index = findDoubleMenace($grille, otherPion($pion))[0]; // find if the opponent can do two tictactoe menaces
+        $index = counterTTTMenace($grille, $pion); // last case to consider
         if($index != -1) return $index;
 
-        // should not reach this step
+        // secure result ; should not reach it
         return random($grille);
     }
 
@@ -282,6 +281,7 @@ function eachDoubleMenacePossibilities()
         [[0, 4, 8], [2, 4, 6]],
     ];
 }
+
 /**
  * Determine if two lines can make a double menace
  *
@@ -325,6 +325,17 @@ function getIndexOfDoubleMenace($grille, $pion, $line1, $line2, $searched_index 
 }
 
 /**
+ * React to a specific case
+ *
+ * @return int - index where to play in the game grid; -1 if no index is found
+ */
+function specialCase($grille, $pion)
+{
+    if($grille == [$pion, "", "", "", otherPion($pion), "", "", "", otherPion($pion)]) return 6;
+    return -1;
+}
+
+/**
  * Block an attack of the opponent and attack
  *
  * @param array $grille - actual state of the game grid
@@ -335,11 +346,11 @@ function counterTTTMenace($grille, $pion)
 {
     // ?grille=["","","","","o","x","","x",""]&pion=o
     $infos = findDoubleMenace($grille, otherPion($pion));
+
+    $index = -1;
     if($infos[0] != -1) $index = blockDoubleMenaceAndAttack($grille, $pion, $infos[0], $infos[1], $infos[2]); // prendre une des positions pour la bloquer
 
-    var_dump($infos); exit();
-    // vérifier si l'une de ses positions fait une doublemenace
-    // sinon bloque simplement
+    return $index;
 }
 
 /**
@@ -355,10 +366,7 @@ function counterTTTMenace($grille, $pion)
 function blockDoubleMenaceAndAttack($grille, $pion, $index, $line1, $line2)
 {
     $empty_indexes = [BDMAAloop($grille, $line1, $index), BDMAAloop($grille, $line2, $index)];
-    foreach($empty_indexes as $searched_index)
-    {
-        var_dump(tttMenace($grille, $pion, $searched_index)); exit();
-    }
+    return $empty_indexes[0];
 }
 
 /**
@@ -377,11 +385,4 @@ function BDMAAloop($grille, $line, $index)
     }
 
     return -1;
-}
-
-function tttMenace($grille, $pion, $index)
-{
-    $eachPossibilities = eachTTTPossibilities();
-
-    /////////////////// here ////////////////////////
 }

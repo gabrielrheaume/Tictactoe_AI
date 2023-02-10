@@ -15,7 +15,7 @@ const grille = ref([
 ])
 
 const delai = ref(0) // v-model
-const delai_fin = ref(1000) // v-model
+const delai_fin = ref(10) // v-model
 let timeout_tour_ordi = null
 
 const en_cours_de_jeu = ref(false)
@@ -61,8 +61,6 @@ function jouerOrdi(url, pion, callback) {
     if (en_cours_de_jeu.value == false) {
         return
     }
-
-    console.log(grille.value) // test
 
     const post = new FormData()
     post.set("grille", JSON.stringify(grille.value))
@@ -207,7 +205,7 @@ function estFini() {
 function finPartie() {
     const gagnant = estFini()
 
-    if(gagnant != 'x') // test
+    if(gagnant)
     {
         victoires.value[gagnant] += 1
     
@@ -216,8 +214,7 @@ function finPartie() {
             "", "", "",
             "", "", ""
         ]
-    
-        console.log("Nouvelle partie")// test
+
         jouerRound()
     }
 }
