@@ -1,6 +1,6 @@
 # Tictactoe_AI
 
-##Description
+##Description  
 This project was a bonus in an Advanced JavaScript Techniques course.  
 In this course, we mainly learned how to use APIs.  
 So, although the majority of the course was on the JavaScript language, we also had some PHP for the APIs.  
