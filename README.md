@@ -1,6 +1,6 @@
 # Tictactoe_AI
 
-##Description  
+## Description  
 This project was a bonus in an Advanced JavaScript Techniques course.  
 In this course, we mainly learned how to use APIs.  
 So, although the majority of the course was on the JavaScript language, we also had some PHP for the APIs.  
@@ -10,7 +10,7 @@ This project therefore aimed, with a site provided (HTML, CSS, JavaScript alread
 Therefore, the only part of the project I worked on was the contents of the backend folder; the ai.php file.  
 Note that the first 4 lines were already present !  
 
-##Code organization  
+## Code organization  
 First of all, there are a few lines alone, which were used to retrieve the information (current grid of the tictactoe and the pawn (X or O) that my AI was playing)  
 
 Then there is the function that determines the move to play. This determined how many rounds had been played on that grid and to call the appropriate function.  
